@@ -55,7 +55,7 @@ namespace MaiConverter.Notes
     {
         public List<long> Ticks = new();
         Dictionary<long,Note[]> Notes = new();
-        public required Dictionary<long,double> BpmList;
+        public Dictionary<long,double> BpmList = new();
 
         public Note[]? this[long tick] => Ticks.Contains(tick) ? Notes[tick] : null;
 
