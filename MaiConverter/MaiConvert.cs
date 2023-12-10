@@ -229,7 +229,8 @@ namespace MaiConverter
             }
             static Slide SlideHandle(string s,long tick)
             {
-                
+                string[] upperPart = {"7","8","1","2"}; 
+                string[] lowerPart = {"6","5","4","3"};
             }
         } 
         public MaiConvert(string filePath,ChartType chartFormat)
