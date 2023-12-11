@@ -228,11 +228,13 @@ namespace MaiConverter
                 var pStart = s.IndexOf('[');
                 var pEnd = s.IndexOf(']');
                 var parameters = s.Substring(pStart + 1,pEnd - pStart - 1).Split('#',StringSplitOptions.RemoveEmptyEntries);
-                string[] upperPart = {"7","8","1","2"}; 
-                string[] lowerPart = {"6","5","4","3"};
-                var body = s.Substring(0,pStart);
                 long bpmTick = 96;
                 long value = 0;
+
+                var body = s.Substring(0, pStart);
+                string[] upperPart = {"7","8","1","2"}; 
+                string[] lowerPart = {"6","5","4","3"};
+                
 
                 if(parameters.Length == 1 )// 8:1
                     value = GetTimeTick(parameters[0], bpm);
@@ -262,8 +264,12 @@ namespace MaiConverter
                     bpmTick = (long)(bpmSeconds / tickTime);
                     value = GetTimeTick(parameters[2], bpm, float.Parse(parameters[1]));
                 }
-                
-                
+                else
+                    throw new UnknowNoteOrParametersException($"\"{s.Substring(pStart + 1, pEnd - pStart - 1)}\"不是有效的时值参数");
+
+
+
+
             }
             static long GetTimeTick(string s,float bpm)
             {
