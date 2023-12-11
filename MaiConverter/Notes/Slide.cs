@@ -2,7 +2,7 @@
 
 namespace MaiConverter.Notes
 {
-    public enum SlidePathType
+    public enum SlideType
     {
         Line,// -
         Polyline,// v&V
@@ -16,10 +16,34 @@ namespace MaiConverter.Notes
         R_Lightning,
         WiFi// w
     }
+    public class Star : Note
+    {
+        /// <summary>
+        /// 表示该Slide的路径
+        /// </summary>
+        public required Slide[] Slides;
+    }
     public class Slide : Note
     {
         /// <summary>
-        /// 表示该Slide的时值,当为0时，表示无长度Hold
+        /// 表示该Slide的起点
+        /// </summary>
+        public required int Start;
+        /// <summary>
+        /// 表示该Slide的终点
+        /// </summary>
+        public required int End;
+        /// <summary>
+        /// 表示该Slide所属组别
+        /// </summary> 
+        public required int Group;
+        /// <summary>
+        /// 用于Polayline类型的Slide
+        /// </summary>
+        public int? Relay;
+
+        ///  <summary>
+        /// 表示该Slide的时值
         /// </summary>
         public required long Value;
 
@@ -28,27 +52,17 @@ namespace MaiConverter.Notes
         /// </summary> 
         public float? Bpm;
         /// <summary>
-        /// 表示该Slide的路径
-        /// </summary>
-        public required SlidePath[] Paths;
-    }
-    public class SlidePath
-    {
-        /// <summary>
-        /// 表示该Path的起点
-        /// </summary>
-        public required int Start;
-        /// <summary>
-        /// 表示该Path的终点
-        /// </summary>
-        public required int End;
-        /// <summary>
-        /// 用于Polayline类型的Path
-        /// </summary>
-        public int? Relay;
-        /// <summary>
-        /// 表示Path的类型
-        /// </summary>
-        public required SlidePathType Type;
+        /// 表示Slide的类型
+        /// </summary>      
+        public required SlideType SlideType;
+
+        public static Slide[] operator + (Slide a,Slide b) => new Slide[] {a,b};
+        public static Slide[] operator + (Slide a,IEnumerable<Slide> array)
+        {
+            var b = array.ToList();
+            b.Add(a);
+            return b.ToArray();
+        }
+        public static Slide[] operator + (IEnumerable<Slide> array,Slide a) => a + array;
     }
 }

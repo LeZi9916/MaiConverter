@@ -13,10 +13,10 @@ namespace MaiConverter.Notes
     {
         Tap,
         Hold,
+        Star,
         Slide,
         Touch,
         TouchHold,
-        Star
     }
     public class Note
     {
@@ -42,13 +42,13 @@ namespace MaiConverter.Notes
         public required bool Break;
 
         public static Note[] operator + (Note a,Note b) => new Note[] {a,b};
-        public static Note[] operator + (Note a,Note[] array)
+        public static Note[] operator + (Note a,IEnumerable<Note> array)
         {
             var b = array.ToList();
             b.Add(a);
             return b.ToArray();
         }
-        public static Note[] operator + (Note[] array,Note a) => a + array;
+        public static Note[] operator + (IEnumerable<Note> array,Note a) => a + array;
 
     }
     public class NoteCollection

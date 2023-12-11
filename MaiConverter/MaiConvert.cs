@@ -115,7 +115,7 @@ namespace MaiConverter
                             if(noteStr.Contains("h"))
                                 notes.Add(HoldHandle(noteStr,tick,bpm));
                             else if(noteStr.Split(new char[]{'-','^','>','<','q','p','w','s','z'}).Length != 1)
-                                notes.Add(SlideHandle(noteStr,tick));
+                                notes.Add(SlideHeadHandle(noteStr,tick,bpm));
                             else if(noteStr.Length == 2)
                             {
                                 notes.Add(TapHandle(noteStr.Substring(0,1),tick));
@@ -227,7 +227,33 @@ namespace MaiConverter
                     Break = isBreak
                 };
             }
-            static Slide SlideHandle(string s,long tick)
+            static Star SlideHeadHandle(string s,long tick,float bpm)
+            {
+                bool isBreak = false;
+                bool isExNote = false;
+                var position = int.Parse(s.Substring(0,1));
+                var slideStr = s.Split("*",StringSplitOptions.RemoveEmptyEntries);
+                Slide[] slides = new Slide[1024];
+                int group = 0;
+
+                if(s.IndexOf("b") == 1)
+                    isBreak = true;
+                if(s.IndexOf("x") == 1)
+                    isExNote = true;
+                foreach(var a in slideStr)
+                    slides += SlideHandle(a,tick,bpm,position,group++);
+                return new Star()
+                {
+                    Tick = tick,
+                    Type = NoteType.Star,
+                    Position = position,
+                    ExNote = isExNote,
+                    Break = isBreak,
+                    Slides = slides 
+                };
+                
+            }
+            static Slide SlideHandle(string s,long tick,float bpm,int position,int group)
             {
                 string[] upperPart = {"7","8","1","2"}; 
                 string[] lowerPart = {"6","5","4","3"};
