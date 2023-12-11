@@ -5,7 +5,9 @@ namespace MaiConverter.Notes
     public enum SlideType
     {
         Line,// -
-        Polyline,// v&V
+        Polyline,// v
+        L_BigPolyline,// V
+        R_BigPolyline,
         L_Arc,// ^
         R_Arc,
         L_Loop,// p&q
