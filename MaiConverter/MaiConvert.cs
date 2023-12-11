@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using MaiConverter.Exception;
 using MaiConverter.Notes;
 
@@ -137,45 +138,11 @@ namespace MaiConverter
                 var pStart = s.IndexOf("[");
                 var pEnd = s.IndexOf("]");
                 var parameters = s.Substring(pStart + 1,pEnd - pStart - 1).Split('#',StringSplitOptions.RemoveEmptyEntries);
-                long numerator = 0;
-                long denominator = 0;
 
-                switch(parameters.Length)
-                {
-                    
-                    case 1:
-                        if(parameters[0].Contains(":"))
-                        {
-                            var _value = parameters[0].Split(':');
-                            if(!long.TryParse(_value[0],out denominator) && !long.TryParse(_value[1],out numerator))
-                                throw new UnknowNoteOrParametersException($"\"{parameters[0]}\"不是有效的时值参数");
-                            value = 384 * (numerator * (1 / denominator));
-                        }
-                        else
-                        {
-                            /// <summary>
-                            /// 特殊时值，具体秒数
-                            /// </summary>
-                            var seconds = float.Parse(parameters[0]);
-                            double tickTime = 60 / bpm / 384;
-                            value = (long)(seconds / tickTime);
-                        }
-                        break;
-                    case 2:
-                        if(parameters[1].Contains(":"))
-                        {
-                            var _value = parameters[1].Split(':');
-                            if(!long.TryParse(_value[0],out denominator) && !long.TryParse(_value[1],out numerator))
-                                throw new UnknowNoteOrParametersException($"\"{parameters[1]}\"不是有效的时值参数");
-                            var _bpm = float.Parse(parameters[0]);
-                            var seconds = (60 / _bpm) * (numerator * (1 / denominator));
-                            double tickTime = 60 / bpm / 384;
-                            value = (long)(seconds / tickTime);
-                        }
-                        else
-                            throw new UnknowNoteOrParametersException($"\"{parameters[0]+parameters[1]}\"不是有效的时值参数");
-                        break;
-                }
+                if(parameters.Length == 1)
+                    value = GetTimeTick(parameters[0], bpm);
+                else if(parameters.Length == 2)
+                    value = GetTimeTick(parameters[1], bpm, float.Parse(parameters[1]));
 
                 if (s.Contains("b"))
                     isBreak = true;
@@ -235,6 +202,9 @@ namespace MaiConverter
                 var slideStr = s.Split("*",StringSplitOptions.RemoveEmptyEntries);
                 Slide[] slides = new Slide[1024];
                 int group = 0;
+                long value = 0;
+                long numerator = 0;
+                long denominator = 0;
 
                 if(s.IndexOf("b") == 1)
                     isBreak = true;
@@ -255,9 +225,65 @@ namespace MaiConverter
             }
             static Slide SlideHandle(string s,long tick,float bpm,int position,int group)
             {
+                var pStart = s.IndexOf('[');
+                var pEnd = s.IndexOf(']');
+                var parameters = s.Substring(pStart + 1,pEnd - pStart - 1).Split('#',StringSplitOptions.RemoveEmptyEntries);
                 string[] upperPart = {"7","8","1","2"}; 
                 string[] lowerPart = {"6","5","4","3"};
+                var body = s.Substring(0,pStart);
+                long bpmTick = 96;
+                long value = 0;
+
+                if(parameters.Length == 1 )// 8:1
+                    value = GetTimeTick(parameters[0], bpm);
+                else if(parameters.Length == 2)
+                {
+                    if (GetEqualElementCount(s.Substring(pStart + 1, pEnd - pStart - 1), '#') == 2) // 3##1.5或3##8:1
+                    {
+                        var bpmSeconds = float.Parse(parameters[0]);
+                        double tickTime = 60 / bpm / 384;
+                        bpmTick = (long)(bpmSeconds / tickTime);
+                        value = GetTimeTick(parameters[1], bpm);
+                    }
+                    else// 160#8:1或160#2
+                    {
+                        var secondBpm = float.Parse(parameters[0]);
+                        bpmTick = (long)(bpmTick * bpm / secondBpm);
+                        if (parameters[1].Contains(':'))
+                            value = GetTimeTick(parameters[1], bpm, secondBpm);
+                        else
+                            value = GetTimeTick(parameters[1], bpm);
+                    }
+                }
+                else if(parameters.Length ==3)//3##160#8:1
+                {
+                    var bpmSeconds = float.Parse(parameters[0]);
+                    double tickTime = 60 / bpm / 384;
+                    bpmTick = (long)(bpmSeconds / tickTime);
+                    value = GetTimeTick(parameters[2], bpm, float.Parse(parameters[1]));
+                }
+                
+                
             }
+            static long GetTimeTick(string s,float bpm)
+            {
+                long numerator = 0;
+                long denominator = 0;
+                if (s.Contains(":"))
+                {
+                    var _value = s.Split(':');
+                    if (!long.TryParse(_value[0], out denominator) && !long.TryParse(_value[1], out numerator))
+                        throw new UnknowNoteOrParametersException($"\"{s}\"不是有效的时值参数");
+                    return 384 * (numerator * (1 / denominator));
+                }
+                else
+                {
+                    double tickTime = 60 / bpm / 384;
+                    long seconds = long.Parse(s);
+                    return (long)(seconds / tickTime);
+                }
+            }
+            static long GetTimeTick(string s, float bpm, float secondBpm) => (long)(( bpm / secondBpm ) * GetTimeTick(s, secondBpm));
         } 
         public MaiConvert(string filePath,ChartType chartFormat)
         {
@@ -274,7 +300,8 @@ namespace MaiConverter
             }
         }
         
-        
+        public static T[] GetEqualElement<T>(IEnumerable<T> elements,T Key) where T: IEquatable<T> => elements.Where(value => value.Equals(Key)).ToArray();
+        public static long GetEqualElementCount<T>(IEnumerable<T> elements,T Key) where T: IEquatable<T> => GetEqualElement(elements,Key).Length;
     }
 
 }
