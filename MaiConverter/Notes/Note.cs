@@ -75,6 +75,7 @@ namespace MaiConverter.Notes
                     return null;
             }
         }
+        public void AddBpm(long tick,double bpm) => BpmList.Add(tick,bpm);
         public void Add(Note note)
         {
             var tick = note.Tick;

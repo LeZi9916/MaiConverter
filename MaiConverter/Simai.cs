@@ -50,7 +50,7 @@ namespace MaiConverter
             {
                 var strArray = chartStr.Split(",");
                 NoteCollection notes = new();
-                Dictionary<long, double> BpmList = new();//<Tick,BPM>
+                //Dictionary<long, double> BpmList = new();//<Tick,BPM>
                 bool applyOffset = false;
                 /// <summary>
                 /// 表示当前时间轴
@@ -84,7 +84,7 @@ namespace MaiConverter
                     if (bpmStart >= 0 && bpmEnd >= 0)
                     {
                         if (float.TryParse(s.Substring(bpmStart + 1, bpmEnd - bpmStart - 1), out bpm))
-                            BpmList.Add(tick, bpm);
+                            notes.AddBpm(tick, bpm);
                         else
                             throw new UnknowBpmValueException($"\"{s.Substring(bpmStart + 1, bpmEnd - bpmStart - 1)}\"不是正确的BPM值");
                         if (!applyOffset)
