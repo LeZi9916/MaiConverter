@@ -52,7 +52,7 @@ namespace MaiConverter.Notes
         /// <summary>
         /// 特殊参数,用于修改该Note的BPM值
         /// </summary> 
-        public long BpmTick;
+        public required long BpmTick;
         /// <summary>
         /// 表示Slide的类型
         /// </summary>      

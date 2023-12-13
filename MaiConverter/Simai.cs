@@ -276,7 +276,8 @@ namespace MaiConverter
                         End = end,
                         Group = group,
                         Value = value,
-                        SlideType = type
+                        SlideType = type,
+                        BpmTick = bpmTick
                     };
                 };
                 List<Slide> slides = new();
