@@ -12,13 +12,12 @@ namespace MaiConverter
     {
         public static class Ma2
         {
-            enum ChartVersion
-            {
-                Normal,
-                Festival
-            }
+            static Dictionary<long, Star> SlideList;//Ticks Slide
+            static Dictionary<long, Star> SlideEndTick;//Ticks Slide
             public static Chart Handle(string filePath)
             {
+                SlideList = new();
+                SlideEndTick = new();
                 Chart chart = new Chart();
                 string version = ""; 
                 string _chartStr = File.ReadAllText(filePath);
@@ -41,12 +40,10 @@ namespace MaiConverter
                 }
                 if (s is null)
                     throw new FormatException($"\"{filePath}\"不是有效的的谱面文件");
-                else if (version == "1.04.00")
-                    Decode(s, def, ChartVersion.Festival);
                 else
-                    Decode(s, def, ChartVersion.Normal);
+                    Decode(s, def);
             }
-            static NoteCollection Decode(string chartStr,int def,ChartVersion version)
+            static NoteCollection Decode(string chartStr,int def)
             {
                 NoteCollection notes = new();
                 var strArray = chartStr.Split("\n",StringSplitOptions.RemoveEmptyEntries);
@@ -68,23 +65,28 @@ namespace MaiConverter
                         notes.Add(HoldHandle(contents, def));
                     else if (contents[0].Contains("ST"))
                     {
+                        
+                    }
+                    else if (slideTypes.Contains(contents[0].Contains("NM") || contents[0].Contains("CV") ? contents[0].Substring(2,3): contents[0]))
+                    {
                         Func<string[], int> GetSlideStr = (array) =>
                         {
                             for (int i = index; i < array.Length; i++)
                             {
                                 var contents = s.Split("\t");
-                                if (contents[0].Contains("ST") || !slideTypes.Contains(contents[0].Replace("NM","").Replace("CV","")))
+                                if (contents[0].Contains("CV"))
                                     return i - 1;
-                                
+                                if (contents[0].Contains("ST") || !slideTypes.Contains(contents[0].Replace("NM", "")))
+                                    return i - 1;
                             }
                             return -1;
                         };
                         int endIndex = GetSlideStr(strArray);
                         if (endIndex == -1)
                             new UnknowNoteOrParametersException($"解释Slide时出错\n出错起始行:{index + 1}");
-                        string[] slideStrArray = new string[endIndex - index +1];
+                        string[] slideStrArray = new string[endIndex - index + 1];
                         Array.Copy(strArray, index, slideStrArray, 0, endIndex - index + 1);
-                        SlideHeadHandle(string.Join('\n', slideStrArray));
+                        notes.Add(SlideHandle(string.Join('\n', slideStrArray)));
                         index = endIndex;
                     }
                 }
@@ -156,9 +158,9 @@ namespace MaiConverter
             }
             static Star SlideHeadHandle(string slideStr)
             {
-
+                var slideArray = slideStr.Split("\n");
             }
-            static Slide SlideHandle()
+            static Slide SlideHandle(string slideStr)
             {
 
             }
