@@ -67,14 +67,14 @@ namespace MaiConverter
                     {
                         
                     }
-                    else if (slideTypes.Contains(contents[0].Contains("NM") || contents[0].Contains("CV") ? contents[0].Substring(2,3): contents[0]))
+                    else if (slideTypes.Contains(contents[0].Contains("NM") || contents[0].Contains("CN") ? contents[0].Substring(2,3): contents[0]))
                     {
                         Func<string[], int> GetSlideStr = (array) =>
                         {
                             for (int i = index; i < array.Length; i++)
                             {
                                 var contents = s.Split("\t");
-                                if (contents[0].Contains("CV"))
+                                if (contents[0].Contains("CN"))
                                     return i - 1;
                                 if (contents[0].Contains("ST") || !slideTypes.Contains(contents[0].Replace("NM", "")))
                                     return i - 1;
